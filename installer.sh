@@ -173,6 +173,8 @@ echo -e "\nChanging to root"
 cat <<EOF > /mnt/installer_chroot.sh 
 #!/bin/bash
 
+set -e
+
 clear
 echo -e "\nDo you need to edit pacman.conf? [y/n]"
 read choice
@@ -233,12 +235,10 @@ echo -e "\nEnter username:"
 read username
 
 # adding a new user
-useradd -m \$username
+useradd \$username -m -G wheel -s /bin/zsh
 passwd \$username
-# adding the users to sudoeres file
-echo "root ALL=(ALL) ALL" >> /etc/sudoers
-echo "\$username ALL=(ALL) ALL" >> /etc/sudoers
-
+# adding the user to sudoeres file
+echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 
 # enable internet service
 systemctl enable NetworkManager.service
@@ -247,22 +247,35 @@ systemctl enable NetworkManager.service
 cat <<EEOF > /home/\$username/install_dots.sh
 #!/bin/bash
 
-# step 7 install dotfiles and user configurations, symlinks, etc...
-clear
-cd \$HOME
-# clone dotfiles from github and create an alias
-git clone --bare https://github.com/ItaiShek/.dotfiles.git \$HOME/.dotfiles
-alias dots='/usr/bin/git --git-dir=\$HOME/.dotfiles/ --work-tree=\$HOME'
+set -e
 
-# install packages, create symlinks, user settings, etc...
-\$HOME/.dotfiles/.dotfiles/dotfiles.sh -i
+# enable aliases in script
+shopt -s exapand_aliases
+
+# step 7 install dotfiles and user configurations, etc...
+clear
+cd \\\$HOME
+# clone dotfiles from github and create an alias
+git clone --bare https://github.com/ItaiShek/.dotfiles.git \\\$HOME/.dotfiles
+alias dots='/usr/bin/git --git-dir=\\\$HOME/.dotfiles/ --work-tree=\\\$HOME'
 
 # restore workng tree files (move the dotfiles to their correct location)
-dots checkout
+dots checkout -f
+
+# change bash_profile name temporarily to avoid issues with password
+mv -f \\\$HOME/.bash_profile \\\$HOME/.bash_profile_tmp
+mv -f \\\$HOME/.zshrc \\\$HOME/.zshrc_tmp
+
+# install packages, user settings, etc...
+\\\$HOME/.dotfiles/dotfiles.sh -i
+
+mv -f \\\$HOME/.bash_profile_tmp \\\$HOME/.bash_profile 
+mv -f \\\$HOME/.zshrc_tmp \\\$HOME/.zshrc
 dots config --local status.showUntrackedFiles no
 
 # enable sddm service
 sudo systemctl enable sddm.service
+
 exit
 EEOF
 
