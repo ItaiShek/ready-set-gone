@@ -275,6 +275,7 @@ exit
 EOF
 
 # run the script
+chmod +x /mnt/installer_chroot.sh
 arch-chroot /mnt ./installer_chroot.sh
 
 
