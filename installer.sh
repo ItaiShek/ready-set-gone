@@ -250,7 +250,7 @@ cat <<EEOF > /home/\$username/install_dots.sh
 set -e
 
 # enable aliases in script
-shopt -s exapand_aliases
+shopt -s expand_aliases
 
 # step 7 install dotfiles and user configurations, etc...
 clear
