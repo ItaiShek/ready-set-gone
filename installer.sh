@@ -233,7 +233,7 @@ echo -e "\nEnter username:"
 read username
 
 # adding a new user
-adduser \$username
+useradd -m \$username
 passwd \$username
 # adding the users to sudoeres file
 echo "root ALL=(ALL) ALL" >> /etc/sudoers
