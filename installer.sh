@@ -149,15 +149,7 @@ clear
 
 # in case there are problem importing GPG keys we might need to change
 # "SigLevel = Never" inside pacman.conf to workaround it
-echo -e "\nDo you need to edit pacman.conf in the new system? [y/n]"
-read choice
-choice=${choice:-n}
-if [[ $choice == 'y' ]] || [[ $choice == 'Y' ]]
-then
-	pacstrap /mnt base linux linux-firmware vim
-else
-	pacstrap /mnt base linux linux-firmware
-fi
+pacstrap /mnt base linux linux-firmware vim
 
 read -srn1 -p "Press any key to continue";echo
 clear
@@ -220,7 +212,7 @@ clear
 pacman --noconfirm -S grub efibootmgr os-prober
 if [[ -z \$efiPartition ]]
 then
-	echo "Enter the EFI partition:"
+	echo -e "\nEnter the EFI partition:"
 	read efiPartition
 fi
 mkdir /boot/efi
@@ -293,6 +285,6 @@ arch-chroot /mnt ./installer_chroot.sh
 
 
 umount -R /mnt
-echo -e "\nReboot and continue with dotfiles"
+echo -e "\nInstallation is finished"
 read -srn1 -p "Press any key to reboot";echo
 reboot
